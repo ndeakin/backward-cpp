@@ -46,24 +46,34 @@
 // #define BACKWARD_SYSTEM_LINUX
 //	- specialization for linux
 //
-// #define BACKWARD_SYSTEM_WINDOWS
-//  - implementation for windows
+// #define BACKWARD_SYSTEM_WINDOWS_x32
+//  - implementation for x86 windows
+//
+// #define BACKWARD_SYSTEM_WINDOWS_x64
+//  - implementation for x64 windows
 //
 // #define BACKWARD_SYSTEM_UNKNOWN
 //	- placebo implementation, does nothing.
 //
 #if   defined(BACKWARD_SYSTEM_LINUX)
-#elif defined(BACKWARD_SYSTEM_WINDOWS)
+#elif defined(BACKWARD_SYSTEM_WINDOWS_x32)
+#elif defined(BACKWARD_SYSTEM_WINDOWS_x64)
 #elif defined(BACKWARD_SYSTEM_UNKNOWN)
 #else
 #	if defined(__linux)
 #		define BACKWARD_SYSTEM_LINUX
-#	elif defined(_WIND32)
-#   define BACKWARD_SYSTEM_WINDOWS
+#	elif defined(_WIN64)                  // _WIN64 is typically defined only on
+#   define BACKWARD_SYSTEM_WINDOWS_x64  // x64 machines.
+# elif defined(_WIN32)                  // _WIN32 is usually defined on both
+#   define BACKWARD_SYSTEM_WINDOWS_x32  // x86 and x64 machines.
 # else
 #		define BACKWARD_SYSTEM_UNKNOWN
 #	endif
 #endif
+
+// ndeakin 2014-02-13 - my g++ 4.8.0 for x64 had both _WIN32 and _WIN64 defined
+//                      as 1. So far that is my only evidence that the
+//                      literature is correct, but so far so good.
 
 #include <fstream>
 #include <iostream>
