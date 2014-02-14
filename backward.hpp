@@ -46,7 +46,7 @@
 // #define BACKWARD_SYSTEM_LINUX
 //	- specialization for linux
 //
-// #define BACKWARD_SYSTEM_WINDOWS_x32
+// #define BACKWARD_SYSTEM_WINDOWS_x86
 //  - implementation for x86 windows
 //
 // #define BACKWARD_SYSTEM_WINDOWS_x64
@@ -56,7 +56,7 @@
 //	- placebo implementation, does nothing.
 //
 #if   defined(BACKWARD_SYSTEM_LINUX)
-#elif defined(BACKWARD_SYSTEM_WINDOWS_x32)
+#elif defined(BACKWARD_SYSTEM_WINDOWS_x86)
 #elif defined(BACKWARD_SYSTEM_WINDOWS_x64)
 #elif defined(BACKWARD_SYSTEM_UNKNOWN)
 #else
@@ -65,7 +65,7 @@
 #	elif defined(_WIN64)                  // _WIN64 is typically defined only on
 #   define BACKWARD_SYSTEM_WINDOWS_x64  // x64 machines.
 # elif defined(_WIN32)                  // _WIN32 is usually defined on both
-#   define BACKWARD_SYSTEM_WINDOWS_x32  // x86 and x64 machines.
+#   define BACKWARD_SYSTEM_WINDOWS_x86  // x86 and x64 machines.
 # else
 #		define BACKWARD_SYSTEM_UNKNOWN
 #	endif
