@@ -223,11 +223,17 @@ extern "C" uintptr_t _Unwind_GetIPInfo(_Unwind_Context*, int*);
 
 #endif // defined(BACKWARD_SYSTEM_LINUX)
 
-#if defined(BACKWARD_SYSTEM_WINDOWS)
+#ifdef BACKWARD_SYSTEM_WINDOWS_x64
 
-// TODO-nick: place includes for windows dependencies here
+// TODO: place includes for windows x64 dependencies here
 
-#endif // defined(BACKWARD_SYSTEM_WINDOWS)
+#endif // BACKWARD_SYSTEM_WINDOWS_x64
+
+#ifdef BACKWARD_SYSTEM_WINDOWS_x86
+
+// TODO: place includes for windows x86 dependencies here
+
+#endif // BACKWARD_SYSTEM_WINDOWS_x64
 
 #ifdef BACKWARD_ATLEAST_CXX11
 #	include <unordered_map>
@@ -266,9 +272,11 @@ namespace system_tag {
 
 #if   defined(BACKWARD_SYSTEM_LINUX)
 	typedef linux_tag current_tag;
-// TODO-nick: probably need to make windows tag somewhere; make sure this works
-#elif defined(BACKWARD_SYSTEM_WINDOWS)
-  typedef windows_tag current_tag;
+// TODO: make windows tags to replace these unknown_tags
+#elif defined(BACKWARD_SYSTEM_WINDOWS_x64)
+  typedef unknown_tag current_tag;
+#elif defined(BACKWARD_SYSTEM_WINDOWS_x32)
+  typedef unknown_tag current_tag;
 #elif defined(BACKWARD_SYSTEM_UNKNOWN)
 	typedef unknown_tag current_tag;
 #else
@@ -294,11 +302,17 @@ namespace trace_resolver_tag {
 #	endif
 #endif // BACKWARD_SYSTEM_LINUX
 
-#ifdef BACKWARD_SYSTEM_WINDOWS
+#ifdef BACKWARD_SYSTEM_WINDOWS_x64
 
-// TODO-nick: implement windows trace_resolver_tag equivalent
+// TODO: implement windows x64 trace_resolver_tag equivalent
 
-#endif // BACKWARD_SYSTEM_WINDOWS
+#endif // BACKWARD_SYSTEM_WINDOWS_x64
+
+#ifdef BACKWARD_SYSTEM_WINDOWS_x86
+
+// TODO: implement windows x86 trace_resolver_tag equivalent
+
+#endif // BACKWARD_SYSTEM_WINDOWS_x86
 } // namespace trace_resolver_tag
 
 
@@ -439,11 +453,17 @@ private:
 
 #endif // BACKWARD_SYSTEM_LINUX
 
-#ifdef BACKWARD_SYSTEM_WINDOWS
+#ifdef BACKWARD_SYSTEM_WINDOWS_x64
 
-// TODO-nick: I'll need to do something here, like just above.
+// TODO: I'll need to add some sort of demangler, like just above.
 
-#endif // BACKWARD_SYSTEM_WINDOWS
+#endif // BACKWARD_SYSTEM_WINDOWS_x64
+
+#ifdef BACKWARD_SYSTEM_WINDOWS_x86
+
+// TODO: another demangler will be needed.
+
+#endif // BACKWARD_SYSTEM_WINDOWS_x86
 
 struct demangler:
 	public demangler_impl<system_tag::current_tag> {};
@@ -707,11 +727,17 @@ public:
 #endif // BACKWARD_HAS_UNWIND
 #endif // BACKWARD_SYSTEM_LINUX
 
-#ifdef BACKWARD_SYSTEM_WINDOWS
+#ifdef BACKWARD_SYSTEM_WINDOWS_x64
 
-// TODO-nick: implement StackTraceImpl< TAG > class template for windows, like above
+// TODO: implement StackTraceImpl< TAG > class template for windows x64
 
-#endif // BACKWARD_SYSTEM_WINDOWS
+#endif // BACKWARD_SYSTEM_WINDOWS_x64
+
+#ifdef BACKWARD_SYSTEM_WINDOWS_x86
+
+// TODO: implement StackTraceImpl< TAG > class template for windows x86
+
+#endif // BACKWARD_SYSTEM_WINDOWS_x86
 
 class StackTrace:
 	public StackTraceImpl<system_tag::current_tag> {};
@@ -735,11 +761,35 @@ public:
 
 #endif
 
-#ifdef BACKWARD_SYSTEM_WINDOWS
+#ifdef BACKWARD_SYSTEM_WINDOWS_x64
 
-// TODO-nick: implement TraceResolverImpl< TAG > class template for windows
+// TODO: implement TraceResolverImpl< TAG > class template for windows x64
+template <>
+class TraceResolverImpl<system_tag::unknown_tag> {
+public:
+	template <class ST>
+		void load_stacktrace(ST&) {}
+	ResolvedTrace resolve(ResolvedTrace t) {
+		return t;
+	}
+};
 
-#endif // BACKWARD_SYSTEM_WINDOWS
+#endif // BACKWARD_SYSTEM_WINDOWS_x64
+
+#ifdef BACKWARD_SYSTEM_WINDOWS_x86
+
+// TODO: implement TraceResolverImpl< TAG > class template for windows x86
+template <>
+class TraceResolverImpl<system_tag::unknown_tag> {
+public:
+	template <class ST>
+		void load_stacktrace(ST&) {}
+	ResolvedTrace resolve(ResolvedTrace t) {
+		return t;
+	}
+};
+
+#endif // BACKWARD_SYSTEM_x86
 
 #ifdef BACKWARD_SYSTEM_LINUX
 
@@ -1537,7 +1587,7 @@ public:
 		// If you are getting snippets many time from the same file, it is
 		// somewhat a waste of CPU, feel free to benchmark and propose a
 		// better solution ;)
-    // TODO-nick: improve this algorithm maybe?
+    // TODO: improve this algorithm maybe?
 
 		_file->clear();
 		_file->seekg(0);
@@ -1740,11 +1790,44 @@ private:
 };
 
 // end BACKWARD_SYSTEM_LINUX
-#elif define(BACKWARD_SYSTEM_WINDOWS)
+#elif defined(BACKWARD_SYSTEM_WINDOWS_x64)
 
-// TODO-nick: implement namepsace Color for windows
+// TODO: implement namepsace Color for windows x64
+namespace Color {
+	enum type {
+		yellow = 0,
+		purple = 0,
+		reset  = 0
+	};
+} // namespace Color
 
-// end BACKWARD_SYSTEM_WINDOWS
+class Colorize {
+public:
+	Colorize(std::FILE*) {}
+	void init() {}
+	void set_color(Color::type) {}
+};
+
+// end BACKWARD_SYSTEM_WINDOWS_x64
+#elif defined(BACKWARD_SYSTEM_WINDOWS_x86)
+
+// TODO: implement namespace Color for windows x86
+namespace Color {
+	enum type {
+		yellow = 0,
+		purple = 0,
+		reset  = 0
+	};
+} // namespace Color
+
+class Colorize {
+public:
+	Colorize(std::FILE*) {}
+	void init() {}
+	void set_color(Color::type) {}
+};
+
+// end BACKWARD_SYSTEM_x86
 #else
 
 namespace Color {
@@ -2012,11 +2095,27 @@ private:
 
 #endif // BACKWARD_SYSTEM_LINUX
 
-#ifdef BACKWARD_SYSTEM_WINDOWS
+#ifdef BACKWARD_SYSTEM_WINDOWS_x64
 
-// TODO-nick: implement the SignalHandling class for windows
+// TODO: implement the SignalHandling class for windows x64
+class SignalHandling {
+public:
+	SignalHandling(const std::vector<int>& = std::vector<int>()) {}
+	bool init() { return false; }
+};
 
-#endif // BACKWARD_SYSTEM_WINDOWS
+#endif // BACKWARD_SYSTEM_WINDOWS_x64
+
+#ifdef BACKWARD_SYSTEM_WINDOWS_x86
+
+// TODO: implement SignalHandling class for windows x86
+class SignalHandling {
+public:
+	SignalHandling(const std::vector<int>& = std::vector<int>()) {}
+	bool init() { return false; }
+};
+
+#endif // BACKWARD_SYSTEM_WINDOWS_x86
 
 #ifdef BACKWARD_SYSTEM_UNKNOWN
 
