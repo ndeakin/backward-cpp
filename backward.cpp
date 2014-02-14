@@ -23,7 +23,7 @@
 // - g++/clang++ -lbfd ...
 // #define BACKWARD_HAS_BFD 1
 
-// On Windows, TODO-nick: explain the windows libraries and any optional #defines
+// On Windows, TODO: explain the windows libraries and any optional #defines
 // - so far, the StackWalk64() function from DbgHelp seems like the best bet
 //   for obtaining the stack trace
 // - see: msdn.microsoft.com/en-us/library/windows/desktop/ms680650(v=vs.85).aspx
