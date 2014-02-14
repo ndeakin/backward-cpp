@@ -46,15 +46,21 @@
 // #define BACKWARD_SYSTEM_LINUX
 //	- specialization for linux
 //
+// #define BACKWARD_SYSTEM_WINDOWS
+//  - implementation for windows
+//
 // #define BACKWARD_SYSTEM_UNKNOWN
 //	- placebo implementation, does nothing.
 //
 #if   defined(BACKWARD_SYSTEM_LINUX)
+#elif defined(BACKWARD_SYSTEM_WINDOWS)
 #elif defined(BACKWARD_SYSTEM_UNKNOWN)
 #else
 #	if defined(__linux)
 #		define BACKWARD_SYSTEM_LINUX
-#	else
+#	elif defined(_WIND32)
+#   define BACKWARD_SYSTEM_WINDOWS
+# else
 #		define BACKWARD_SYSTEM_UNKNOWN
 #	endif
 #endif
@@ -207,6 +213,12 @@ extern "C" uintptr_t _Unwind_GetIPInfo(_Unwind_Context*, int*);
 
 #endif // defined(BACKWARD_SYSTEM_LINUX)
 
+#if defined(BACKWARD_SYSTEM_WINDOWS)
+
+// TODO-nick: place includes for windows dependencies here
+
+#endif // defined(BACKWARD_SYSTEM_WINDOWS)
+
 #ifdef BACKWARD_ATLEAST_CXX11
 #	include <unordered_map>
 #	include <utility> // for std::swap
@@ -244,6 +256,9 @@ namespace system_tag {
 
 #if   defined(BACKWARD_SYSTEM_LINUX)
 	typedef linux_tag current_tag;
+// TODO-nick: probably need to make windows tag somewhere; make sure this works
+#elif defined(BACKWARD_SYSTEM_WINDOWS)
+  typedef windows_tag current_tag;
 #elif defined(BACKWARD_SYSTEM_UNKNOWN)
 	typedef unknown_tag current_tag;
 #else
@@ -268,6 +283,12 @@ namespace trace_resolver_tag {
 #		error "You shall not pass, until you know what you want."
 #	endif
 #endif // BACKWARD_SYSTEM_LINUX
+
+#ifdef BACKWARD_SYSTEM_WINDOWS
+
+// TODO-nick: implement windows trace_resolver_tag equivalent
+
+#endif // BACKWARD_SYSTEM_WINDOWS
 } // namespace trace_resolver_tag
 
 
@@ -407,6 +428,12 @@ private:
 };
 
 #endif // BACKWARD_SYSTEM_LINUX
+
+#ifdef BACKWARD_SYSTEM_WINDOWS
+
+// TODO-nick: I'll need to do something here, like just above.
+
+#endif // BACKWARD_SYSTEM_WINDOWS
 
 struct demangler:
 	public demangler_impl<system_tag::current_tag> {};
@@ -670,6 +697,12 @@ public:
 #endif // BACKWARD_HAS_UNWIND
 #endif // BACKWARD_SYSTEM_LINUX
 
+#ifdef BACKWARD_SYSTEM_WINDOWS
+
+// TODO-nick: implement StackTraceImpl< TAG > class template for windows, like above
+
+#endif // BACKWARD_SYSTEM_WINDOWS
+
 class StackTrace:
 	public StackTraceImpl<system_tag::current_tag> {};
 
@@ -691,6 +724,12 @@ public:
 };
 
 #endif
+
+#ifdef BACKWARD_SYSTEM_WINDOWS
+
+// TODO-nick: implement TraceResolverImpl< TAG > class template for windows
+
+#endif // BACKWARD_SYSTEM_WINDOWS
 
 #ifdef BACKWARD_SYSTEM_LINUX
 
@@ -1488,6 +1527,7 @@ public:
 		// If you are getting snippets many time from the same file, it is
 		// somewhat a waste of CPU, feel free to benchmark and propose a
 		// better solution ;)
+    // TODO-nick: improve this algorithm maybe?
 
 		_file->clear();
 		_file->seekg(0);
@@ -1689,8 +1729,13 @@ private:
 	bool       _istty;
 };
 
-#else // ndef BACKWARD_SYSTEM_LINUX
+// end BACKWARD_SYSTEM_LINUX
+#elif define(BACKWARD_SYSTEM_WINDOWS)
 
+// TODO-nick: implement namepsace Color for windows
+
+// end BACKWARD_SYSTEM_WINDOWS
+#else
 
 namespace Color {
 	enum type {
@@ -1707,7 +1752,7 @@ public:
 	void set_color(Color::type) {}
 };
 
-#endif // BACKWARD_SYSTEM_LINUX
+#endif // end other (should be BACKWARD_SYSEM_UNKNOWN)
 
 class Printer {
 public:
@@ -1956,6 +2001,12 @@ private:
 };
 
 #endif // BACKWARD_SYSTEM_LINUX
+
+#ifdef BACKWARD_SYSTEM_WINDOWS
+
+// TODO-nick: implement the SignalHandling class for windows
+
+#endif // BACKWARD_SYSTEM_WINDOWS
 
 #ifdef BACKWARD_SYSTEM_UNKNOWN
 
