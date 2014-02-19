@@ -64,8 +64,10 @@
 #		define BACKWARD_SYSTEM_LINUX
 #	elif defined(_WIN64)                  // _WIN64 is typically defined only on
 #   define BACKWARD_SYSTEM_WINDOWS_x64  // x64 machines.
+#   define BACKWARD_SYSTEM_WINDOWS
 # elif defined(_WIN32)                  // _WIN32 is usually defined on both
 #   define BACKWARD_SYSTEM_WINDOWS_x86  // x86 and x64 machines.
+#   define BACKWARD_SYSTEM_WINDOWS
 # else
 #		define BACKWARD_SYSTEM_UNKNOWN
 #	endif
@@ -222,6 +224,12 @@ extern "C" uintptr_t _Unwind_GetIPInfo(_Unwind_Context*, int*);
 #	endif
 
 #endif // defined(BACKWARD_SYSTEM_LINUX)
+
+#ifdef BACKWARD_SYSTEM_WINDOWS
+
+#include <signal.h>
+
+#endif // BACKWARD_SYSTEM_WINDOWS
 
 #ifdef BACKWARD_SYSTEM_WINDOWS_x64
 
@@ -1982,14 +1990,13 @@ private:
 
 /*************** SIGNALS HANDLING ***************/
 
-#ifdef BACKWARD_SYSTEM_LINUX
-
+#if defined(BACKWARD_SYSTEM_LINUX)
 
 class SignalHandling {
 public:
    static std::vector<int> make_default_signals() {
        const int signals[] = {
-		// default action: Core
+    // default action: Core
 		SIGILL,
 		SIGABRT,
 		SIGFPE,
@@ -2059,19 +2066,19 @@ public:
 private:
 	details::handle<char*> _stack_content;
 	bool                   _loaded;
-
-	static void sig_handler(int, siginfo_t* info, void* _ctx) {
+	// sig_handler for linux
+  static void sig_handler(int, siginfo_t* info, void* _ctx) {
 		ucontext_t *uctx = (ucontext_t*) _ctx;
 
 		StackTrace st;
 		void* error_addr = 0;
-#ifdef REG_RIP // x86_64
+# ifdef REG_RIP // x86_64
 		error_addr = reinterpret_cast<void*>(uctx->uc_mcontext.gregs[REG_RIP]);
-#elif defined(REG_EIP) // x86_32
+# elif defined(REG_EIP) // x86_32
 		error_addr = reinterpret_cast<void*>(uctx->uc_mcontext.gregs[REG_EIP]);
-#else
-#	warning ":/ sorry, ain't know no nothing none not of your architecture!"
-#endif
+# else
+#	 warning ":/ sorry, ain't know no nothing none not of your architecture!"
+# endif
 		if (error_addr) {
 			st.load_from(error_addr, 32);
 		} else {
@@ -2092,9 +2099,111 @@ private:
 		_exit(EXIT_FAILURE);
 	}
 };
-
 #endif // BACKWARD_SYSTEM_LINUX
 
+#ifdef BACKWARD_SYSTEM_WINDOWS
+
+// TODO: finish implementing SignalHandling for windows
+
+class SignalHandling {
+public:
+   static std::vector<int> make_default_signals() {
+       const int signals[] = {
+		SIGILL,
+		SIGABRT,
+		SIGFPE,
+		SIGSEGV,
+		SIGINT,
+		SIGTERM,
+	};
+        return std::vector<int>(signals, signals + sizeof signals);
+   }
+
+  SignalHandling(const std::vector<int>& signals = make_default_signals()):
+	  _loaded(false) {
+		bool success = true;
+
+		const size_t stack_size = 1024 * 1024 * 8;
+		_stack_content.reset((char*)malloc(stack_size));
+    if (_stack_content) {
+			// stack_t doesn't seam to be supported by mingw
+#if 0
+      stack_t ss;
+			ss.ss_sp = _stack_content.get();
+			ss.ss_size = stack_size;
+			ss.ss_flags = 0;
+
+			if (sigaltstack(&ss, 0) < 0) {
+				success = false;
+			}
+#endif
+		} else {
+			success = false;
+		}
+
+		for (size_t i = 0; i < signals.size(); ++i) {
+			// sigaction also doesn't seem to be supported in mingw
+#if 0
+      struct sigaction action;
+			memset(&action, 0, sizeof action);
+			action.sa_flags = (SA_SIGINFO | SA_ONSTACK | SA_NODEFER |
+					SA_RESETHAND);
+			sigfillset(&action.sa_mask);
+			sigdelset(&action.sa_mask, signals[i]);
+			action.sa_sigaction = &sig_handler;
+
+			int r = sigaction(signals[i], &action, 0);
+			if (r < 0) success = false;
+#endif
+    }
+
+		_loaded = success;
+	}
+
+	bool loaded() const { return _loaded; }
+
+private:
+	details::handle<char*> _stack_content;
+	bool                   _loaded;
+	static void sig_handler(int, void* info, void* _ctx) {
+#if 0		
+    ucontext_t *uctx = (ucontext_t*) _ctx;
+
+		StackTrace st;
+		void* error_addr = 0;
+# ifdef REG_RIP // x86_64
+		error_addr = reinterpret_cast<void*>(uctx->uc_mcontext.gregs[REG_RIP]);
+# elif defined(REG_EIP) // x86_32
+		error_addr = reinterpret_cast<void*>(uctx->uc_mcontext.gregs[REG_EIP]);
+# else
+#	 warning ":/ sorry, ain't know no nothing none not of your architecture!"
+# endif
+		if (error_addr) {
+			st.load_from(error_addr, 32);
+		} else {
+			st.load_here(32);
+		}
+
+		Printer printer;
+		printer.address = true;
+		printer.print(st, stderr);
+
+		psiginfo(info, 0);
+
+		// try to forward the signal.
+		raise(info->si_signo);
+
+		// terminate the process immediately.
+		puts("watf? exit");
+		_exit(EXIT_FAILURE);
+#endif
+	}
+};
+
+#endif
+
+
+#if 0
 #ifdef BACKWARD_SYSTEM_WINDOWS_x64
 
 // TODO: implement the SignalHandling class for windows x64
@@ -2116,6 +2225,8 @@ public:
 };
 
 #endif // BACKWARD_SYSTEM_WINDOWS_x86
+#endif
+
 
 #ifdef BACKWARD_SYSTEM_UNKNOWN
 
