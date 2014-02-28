@@ -2109,7 +2109,10 @@ class SignalHandling {
 public:
    static std::vector<int> make_default_signals() {
        const int signals[] = {
-		SIGILL,
+		// TODO: These are specific to mingw for windows and should depend on
+    //       the mingw preprocessor define.  Should also investigate cygwin's
+    //       signals.
+    SIGILL,
 		SIGABRT,
 		SIGFPE,
 		SIGSEGV,
