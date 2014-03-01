@@ -228,7 +228,6 @@ extern "C" uintptr_t _Unwind_GetIPInfo(_Unwind_Context*, int*);
 #ifdef BACKWARD_SYSTEM_WINDOWS
 
 #include <signal.h>
-#include <windows.h>
 
 #endif // BACKWARD_SYSTEM_WINDOWS
 
