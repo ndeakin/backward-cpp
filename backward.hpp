@@ -2165,12 +2165,13 @@ private:
         // TODO: Perform windows specific StackTrace operations to set up
         //       the StackTrace for printing.
 
-        // TODO: This function seems to be interupted part way through; nothing
-        //       in sig_handler will print more than about 10 characters.
+        // TODO: Sending SIGINT with Ctrl-c seems to interupt execution of
+        //       this function while it executes; the printer won't finish
+        //       printing.
 
 		Printer printer;
 		printer.address = true;
-		//printer.print(st, stderr);
+		printer.print(st, stderr);
 
         // TODO: Print the signal name, and also see if there is a windows
         //       equivalent to psiginfo.
