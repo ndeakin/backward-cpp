@@ -2112,9 +2112,9 @@ public:
    static std::vector<int> make_default_signals() {
        const int signals[] = {
 		// TODO: These are specific to mingw for windows and should depend on
-    //       the mingw preprocessor define.  Should also investigate cygwin's
-    //       signals.
-    SIGILL,
+        //       the mingw preprocessor define.  Should also investigate cygwin's
+        //       signals.
+        SIGILL,
 		SIGABRT,
 		SIGFPE,
 		SIGSEGV,
@@ -2160,69 +2160,32 @@ private:
 	details::handle<char*> _stack_content;
 	bool                   _loaded;
 	static void sig_handler(int sig) {
-#if 0		
-        ucontext_t *uctx = (ucontext_t*) _ctx;
-
 		StackTrace st;
-		void* error_addr = 0;
-# ifdef REG_RIP // x86_64
-		error_addr = reinterpret_cast<void*>(uctx->uc_mcontext.gregs[REG_RIP]);
-# elif defined(REG_EIP) // x86_32
-		error_addr = reinterpret_cast<void*>(uctx->uc_mcontext.gregs[REG_EIP]);
-# else
-#	 warning ":/ sorry, ain't know no nothing none not of your architecture!"
-# endif
-		if (error_addr) {
-			st.load_from(error_addr, 32);
-		} else {
-			st.load_here(32);
-		}
+
+        // TODO: Perform windows specific StackTrace operations to set up
+        //       the StackTrace for printing.
+
+        // TODO: This function seems to be interupted part way through; nothing
+        //       in sig_handler will print more than about 10 characters.
 
 		Printer printer;
 		printer.address = true;
-		printer.print(st, stderr);
+		//printer.print(st, stderr);
 
-		psiginfo(info, 0);
+        // TODO: Print the signal name, and also see if there is a windows
+        //       equivalent to psiginfo.
+        printf( "caught signal (%d).\n", sig );
 
-		// try to forward the signal.
-		raise(info->si_signo);
+        // try to forward the signal.
+		raise( sig );
 
 		// terminate the process immediately.
 		puts("watf? exit");
 		_exit(EXIT_FAILURE);
-#endif
-
-        printf( "caught signal (%d).\n", sig );
     }
 };
 
-#endif
-
-
-#if 0
-#ifdef BACKWARD_SYSTEM_WINDOWS_x64
-
-// TODO: implement the SignalHandling class for windows x64
-class SignalHandling {
-public:
-	SignalHandling(const std::vector<int>& = std::vector<int>()) {}
-	bool init() { return false; }
-};
-
-#endif // BACKWARD_SYSTEM_WINDOWS_x64
-
-#ifdef BACKWARD_SYSTEM_WINDOWS_x86
-
-// TODO: implement SignalHandling class for windows x86
-class SignalHandling {
-public:
-	SignalHandling(const std::vector<int>& = std::vector<int>()) {}
-	bool init() { return false; }
-};
-
-#endif // BACKWARD_SYSTEM_WINDOWS_x86
-#endif
-
+#endif // BACKWARD_SYSTEM_WINDOWS
 
 #ifdef BACKWARD_SYSTEM_UNKNOWN
 
