@@ -2108,21 +2108,49 @@ private:
 //       of the signal is printed.  No attempt to print the stack is made.
 
 class SignalHandling {
-public:
-   static std::vector<int> make_default_signals() {
-       const int signals[] = {
-		// TODO: These are specific to mingw for windows and should depend on
-        //       the mingw preprocessor define.  Should also investigate cygwin's
-        //       signals.
-        SIGILL,
-		SIGABRT,
-		SIGFPE,
-		SIGSEGV,
-		SIGINT,
-		SIGTERM,
-	};
+  public:
+    static std::vector<int> make_default_signals() {
+        const int signals[] = {
+            // TODO: These are specific to mingw for windows and should depend on
+            //       the mingw preprocessor define.  Should also investigate cygwin's
+            //       signals.
+            SIGILL,
+            SIGABRT,
+            SIGFPE,
+            SIGSEGV,
+            SIGINT,
+            SIGTERM
+        };
         return std::vector<int>(signals, signals + sizeof signals);
-   }
+    }
+
+    static void psiginfo_windows( int sig ) {
+        std::string signal_name;
+        switch( sig ) {
+            case SIGILL:
+                signal_name = "SIGILL";
+                break;
+            case SIGABRT:
+                signal_name = "SIGABRT";
+                break;
+            case SIGFPE:
+                signal_name = "SIGFPE";
+                break;
+            case SIGSEGV:
+                signal_name = "SIGSEGV";
+                break;
+            case SIGINT:
+                signal_name = "SIGINT";
+                break;
+            case SIGTERM:
+                signal_name = "SIGTERM";
+                break;
+            default:
+                signal_name = "unknown";
+                break;
+        }
+        printf( "caught signal: %s (%d).\n", signal_name.c_str(), sig );
+    }
 
   SignalHandling(const std::vector<int>& signals = make_default_signals()):
 	  _loaded(false) {
@@ -2173,9 +2201,7 @@ private:
 		printer.address = true;
 		printer.print(st, stderr);
 
-        // TODO: Print the signal name, and also see if there is a windows
-        //       equivalent to psiginfo.
-        printf( "caught signal (%d).\n", sig );
+        psiginfo_windows( sig );
 
         // try to forward the signal.
 		raise( sig );
