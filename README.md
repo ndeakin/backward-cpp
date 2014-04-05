@@ -57,9 +57,12 @@ your sources.
 
 ### Libraries to read the debug info
 
-Backward support pretty printed stack traces on GNU/Linux only, it will compile
-fine under other platforms but will not do anything.  **Pull requests are
-welcome :)**
+Backward currently supports pretty printed stack traces on GNU/Linux, and on
+Windows coming soon*! It will compile fine under other platforms but will not do
+anything.  **Pull requests are welcome :)**
+
+*currently signals will be handled on windows and the signal name printed. The
+stack trace will be empty.
 
 Also, by default you will get a really basic stack trace, based on the
 `backtrace_symbols` API:
