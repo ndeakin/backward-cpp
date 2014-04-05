@@ -2193,10 +2193,6 @@ private:
         // TODO: Perform windows specific StackTrace operations to set up
         //       the StackTrace for printing.
 
-        // TODO: Sending SIGINT with Ctrl-c seems to interupt execution of
-        //       this function while it executes; the printer won't finish
-        //       printing.
-
 		Printer printer;
 		printer.address = true;
 		printer.print(st, stderr);
